@@ -34,17 +34,17 @@ class User
         return $this->id;
     }
 
-    public function getLogin(): ?string
-    {
-        return $this->login;
-    }
+    // public function getLogin(): ?string
+    // {
+    //     return $this->login;
+    // }
 
-    public function setLogin(string $login): self
-    {
-        $this->login = $login;
+    // public function setLogin(string $login): self
+    // {
+    //     $this->login = $login;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     public function getPassword(): ?string
     {
