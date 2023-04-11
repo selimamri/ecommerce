@@ -1,5 +1,6 @@
 {
     "require": {
-        "symfony/password-hasher": "^6.2"
+        "symfony/password-hasher": "^6.2",
+        "lexik/jwt-authentication-bundle": "^2.18"
     }
 }
