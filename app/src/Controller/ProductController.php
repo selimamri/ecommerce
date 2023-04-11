@@ -21,7 +21,7 @@ class ProductController extends AbstractController
         ]);
     }
 
-    # CREATE A PRODUCT WITH JSON
+    # CREATE A PRODUCT
     #[Route('api/products', name: 'app_product_create', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -62,23 +62,23 @@ class ProductController extends AbstractController
         ], 200);
     }
 
-    # GET PRODUCT INFORMATION
-    // #[Route('api/products/{id}', name: 'app_product_show', methods: ['GET'])]
-    // public function show(ProductRepository $productRepository, $id): JsonResponse
-    // {
-    //     $productData = $productRepository->find($id);
+    # DISPLAY PRODUCT INFORMATION
+    #[Route('api/products/{id}', name: 'app_product_show', methods: ['GET'])]
+    public function show(ProductRepository $productRepository, $id): JsonResponse
+    {
+        $productData = $productRepository->find($id);
 
-    //     if (!$productData) {
-    //         return $this->json([
-    //             'success' => false,
-    //             'message' => 'Product not found'
-    //         ], 404);
-    //     }
-
-    //     return $this->json([
-    //         'success' => true,
-    //         'message' => 'Product found',
-    //         'data' => $productData
-    //     ], 200);
-    // }
+        if (!$productData) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Product not found'
+            ], 404);
+        } else {
+            return $this->json([
+                'success' => true,
+                'message' => 'Product found',
+                'data' => $productData
+            ], 200);
+        }
+    }
 }
