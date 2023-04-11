@@ -3,15 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\UserType;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use function password_hash;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/', name: 'homepage')]
@@ -26,18 +24,7 @@ class UserController extends AbstractController
         ]);
     }
 
-    // #[Route('user', name: 'app_user_index', methods: ['GET'])]
-    // public function index(UserRepository $userRepository): JsonResponse
-    // {
-    //     // return $this->render('user/index.html.twig', [
-    //     //     'users' => $userRepository->findAll(),
-    //     // ]);
-    //     return new JsonResponse([
-    //         'success' => true,
-    //         'users' => $userRepository->findAll(),
-    //     ]);
-    // }
-
+    # CREATE A USER
     #[Route('api/register', name: 'app_user_create', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasherInterface): JsonResponse
     {
@@ -47,7 +34,7 @@ class UserController extends AbstractController
 
         $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
     
-        $user->setLogin($data['login']);
+        // $user->setLogin($data['login']);
         $user->setEmail($data['email']);
         $user->setPassword($hashedPassword);
         $user->setFirstname($data['firstname']);
@@ -62,7 +49,8 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('user/{id}', name: 'app_user_show', methods: ['GET'])]
+    # DISPLAY USER INFORMATION
+    #[Route('api/user/{id}', name: 'app_user_show', methods: ['GET'])]
     public function show(UserRepository $userRepository, $id): JsonResponse
     {
         $userData = $userRepository->find($id);
@@ -76,39 +64,57 @@ class UserController extends AbstractController
 
         return $this->json([
             'success' => true,
-            'login' => $userData->getLogin(),
-            'password' => $userData->getPassword(),
+            // 'login' => $userData->getLogin(),
+            // 'password' => $userData->getPassword(),
             'email' => $userData->getEmail(),
             'firstname' => $userData->getFirstname(),
             'lastname' => $userData->getLastname()
         ]);
     }
 
-    // #[Route('user/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
-    // public function edit(Request $request, User $user, UserRepository $userRepository): JsonResponse
-    // {
-    //     $form = $this->createForm(UserType::class, $user);
-    //     $form->handleRequest($request);
+    # DISPLAY ALL USERS
+    #[Route('api/users', name: 'app_users_list', methods: ['GET'])]
+    public function list(UserRepository $userRepository): JsonResponse
+    {
+        $userData = $userRepository->findAll();
 
-    //     if ($form->isSubmitted() && $form->isValid()) {
-    //         $userRepository->save($user, true);
+        return $this->json($userData);
+    }
 
-    //         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
-    //     }
+    # UPDATE USER INFORMATION
+    #[Route('api/users/{id}', name: 'app_user_update', methods: ['PUT'])]
+    public function update(Request $request, UserRepository $userRepository, $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $userData = $userRepository->find($id);
 
-    //     return $this->renderForm('user/edit.html.twig', [
-    //         'user' => $user,
-    //         'form' => $form,
-    //     ]);
-    // }
+        $data = json_decode($request->getContent(), true);
 
-    // #[Route('user/{id}', name: 'app_user_delete', methods: ['POST'])]
-    // public function delete(Request $request, User $user, UserRepository $userRepository): JsonResponse
-    // {
-    //     if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
-    //         $userRepository->remove($user, true);
-    //     }
+        if (!$userData) {
+            return $this->json([
+                'success' => false,
+                'message' => 'User not found'
+            ]);
+        }
 
-    //     return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
-    // }
+        // $login = $request->request->get('login');
+        // if (!empty($login)) {
+        //     $userData->setLogin($login);
+        // }
+
+        // $userData->setLogin($request->get('login'));
+        // $userData->setPassword($request->get('password'));
+        $userData->setEmail($data['email']);
+        $userData->setFirstname($data['firstname']);
+        $userData->setLastname($data['lastname']);
+
+        $entityManager->persist($userData);
+        $entityManager->flush();
+
+
+        return $this->json([
+            'success' => true,
+            'message' => 'User updated successfully',
+            'data' => $userData
+        ], 200);
+    }
 }
