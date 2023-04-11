@@ -25,6 +25,7 @@ class UserController extends AbstractController
     }
 
     # CREATE A USER
+    # CREATE A USER
     #[Route('api/register', name: 'app_user_create', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -34,7 +35,7 @@ class UserController extends AbstractController
 
         $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
     
-        $user->setLogin($data['login']);
+        // $user->setLogin($data['login']);
         $user->setEmail($data['email']);
         $user->setPassword($hashedPassword);
         $user->setFirstname($data['firstname']);
@@ -51,6 +52,8 @@ class UserController extends AbstractController
 
     # DISPLAY USER INFORMATION
     #[Route('api/user/{id}', name: 'app_user_show', methods: ['GET'])]
+    # DISPLAY USER INFORMATION
+    #[Route('api/user/{id}', name: 'app_user_show', methods: ['GET'])]
     public function show(UserRepository $userRepository, $id): JsonResponse
     {
         $userData = $userRepository->find($id);
@@ -64,6 +67,8 @@ class UserController extends AbstractController
 
         return $this->json([
             'success' => true,
+            // 'login' => $userData->getLogin(),
+            // 'password' => $userData->getPassword(),
             // 'login' => $userData->getLogin(),
             // 'password' => $userData->getPassword(),
             'email' => $userData->getEmail(),
@@ -86,7 +91,22 @@ class UserController extends AbstractController
     public function update(Request $request, UserRepository $userRepository, $id, EntityManagerInterface $entityManager): JsonResponse
     {
         $userData = $userRepository->find($id);
+    # DISPLAY ALL USERS
+    #[Route('api/users', name: 'app_users_list', methods: ['GET'])]
+    public function list(UserRepository $userRepository): JsonResponse
+    {
+        $userData = $userRepository->findAll();
 
+        return $this->json($userData);
+    }
+
+    # UPDATE USER INFORMATION
+    #[Route('api/users/{id}', name: 'app_user_update', methods: ['PUT'])]
+    public function update(Request $request, UserRepository $userRepository, $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $userData = $userRepository->find($id);
+
+        $data = json_decode($request->getContent(), true);
         $data = json_decode($request->getContent(), true);
 
         if (!$userData) {
@@ -95,7 +115,17 @@ class UserController extends AbstractController
                 'message' => 'User not found'
             ]);
         }
+        if (!$userData) {
+            return $this->json([
+                'success' => false,
+                'message' => 'User not found'
+            ]);
+        }
 
+        // $login = $request->request->get('login');
+        // if (!empty($login)) {
+        //     $userData->setLogin($login);
+        // }
         // $login = $request->request->get('login');
         // if (!empty($login)) {
         //     $userData->setLogin($login);
@@ -110,7 +140,22 @@ class UserController extends AbstractController
         $entityManager->persist($userData);
         $entityManager->flush();
 
+        // $userData->setLogin($request->get('login'));
+        // $userData->setPassword($request->get('password'));
+        $userData->setEmail($data['email']);
+        $userData->setFirstname($data['firstname']);
+        $userData->setLastname($data['lastname']);
 
+        $entityManager->persist($userData);
+        $entityManager->flush();
+
+
+        return $this->json([
+            'success' => true,
+            'message' => 'User updated successfully',
+            'data' => $userData
+        ], 200);
+    }
         return $this->json([
             'success' => true,
             'message' => 'User updated successfully',
