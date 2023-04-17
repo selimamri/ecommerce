@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 
+
 class ProductController extends AbstractController
 {
     #[Route('/product', name: 'app_product')]
@@ -21,7 +22,7 @@ class ProductController extends AbstractController
         ]);
     }
 
-    # CREATE A PRODUCT
+    # ADD A PRODUCT
     #[Route('api/products', name: 'app_product_create', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -42,7 +43,7 @@ class ProductController extends AbstractController
         ], 201);
     }
 
-    # DISPLAY ALL PRODUCTS
+    # RETRIEVE LIST OF PRODUCTS
     #[Route('api/products', name: 'app_product_list', methods: ['GET'])]
     public function list(ProductRepository $productRepository): JsonResponse
     {
@@ -62,11 +63,11 @@ class ProductController extends AbstractController
         ], 200);
     }
 
-    # DISPLAY PRODUCT INFORMATION
-    #[Route('api/products/{id}', name: 'app_product_show', methods: ['GET'])]
-    public function show(ProductRepository $productRepository, $id): JsonResponse
+    # RETRIEVE INFORMATION ON A SPECIFIC PRODUCT
+    #[Route('api/products/{productId}', name: 'app_product_show', methods: ['GET'])]
+    public function show(ProductRepository $productRepository, $productId): JsonResponse
     {
-        $productData = $productRepository->find($id);
+        $productData = $productRepository->find($productId);
 
         if (!$productData) {
             return $this->json([
@@ -78,6 +79,45 @@ class ProductController extends AbstractController
                 'success' => true,
                 'message' => 'Product found',
                 'data' => $productData
+            ], 200);
+        }
+    }
+
+    # MODIFY AND DELETE A PRODUCT
+    #[Route('api/products/{productId}', name: 'app_product_update', methods: ['PUT', 'DELETE'])]
+    public function update(Request $request, ProductRepository $productRepository, EntityManagerInterface $entityManager, $productId): JsonResponse
+    {
+        $productData = $productRepository->find($productId);
+
+        if (!$productData) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Product not found'
+            ], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if ($request->getMethod() == 'PUT') {
+            $productData->setName($data['name']);
+            $productData->setDescription($data['description']);
+            $productData->setPhoto($data['photo']);
+            $productData->setPrice($data['price']);
+
+            $entityManager->persist($productData);
+            $entityManager->flush();
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Product updated successfully'
+            ], 200);
+        } else if ($request->getMethod() == 'DELETE') {
+            $entityManager->remove($productData);
+            $entityManager->flush();
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Product deleted successfully'
             ], 200);
         }
     }
