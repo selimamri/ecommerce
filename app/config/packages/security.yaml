@@ -46,7 +46,7 @@ security:
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/register, roles: PUBLIC_ACCESS }
     - { path: ^/api/users, roles: IS_AUTHENTICATED_FULLY }
-    - { path: ^/api/products/[0-9]+$, roles: IS_AUTHENTICATED_FULLY, methods: [GET] }
+    - { path: ^/api/products/[0-9]+$, roles: PUBLIC_ACCESS, methods: [GET] }
     - { path: ^/api/products/[0-9]+$, roles: IS_AUTHENTICATED_FULLY, methods: [PUT, DELETE] }
     - { path: ^/api/products, roles: PUBLIC_ACCESS, methods: [GET] }
     - { path: ^/api/products, roles: IS_AUTHENTICATED_FULLY, methods: [POST] }

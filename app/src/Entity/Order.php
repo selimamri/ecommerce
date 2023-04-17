@@ -29,6 +29,9 @@ class Order
     #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'orders')]
     private Collection $products;
 
+    #[ORM\Column]
+    private ?bool $isValidate = null;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -97,6 +100,18 @@ class Order
     public function removeProduct(Product $product): self
     {
         $this->products->removeElement($product);
+
+        return $this;
+    }
+
+    public function isValidate(): ?bool
+    {
+        return $this->isValidate;
+    }
+
+    public function setIsValidate(bool $isValidate): self
+    {
+        $this->isValidate = $isValidate;
 
         return $this;
     }

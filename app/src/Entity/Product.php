@@ -35,7 +35,6 @@ class Product
     {
         $this->orders = new ArrayCollection();
     }
-
     
 
     public function getId(): ?int

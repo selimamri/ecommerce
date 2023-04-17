@@ -11,6 +11,8 @@ use function password_hash;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Entity\Order;
+use App\Repository\OrderRepository;
 
 #[Route('/', name: 'homepage')]
 class UserController extends AbstractController
@@ -40,13 +42,21 @@ class UserController extends AbstractController
         $user->setFirstname($data['firstname']);
         $user->setLastname($data['lastname']);
 
+        # create a new order
+        $order = new Order();
+        $order->setTotalPrice(0);
+        $order->setUser($user);
+        $order->setIsValidate(false);
+        $date = new \DateTime();
+        $order->setCreationDate($date);
+        
         $entityManager->persist($user);
         $entityManager->flush();
 
         return $this->json([
             'success' => true,
-            'message' => 'User created successfully'
-        ]);
+            'message' => 'User and Order created successfully'
+        ], 201);
     }
 
     # DISPLAY USER INFORMATION
@@ -59,7 +69,7 @@ class UserController extends AbstractController
             return $this->json([
                 'success' => false,
                 'message' => 'User not found'
-            ]);
+            ], 404);
         }
 
         return $this->json([
@@ -69,7 +79,7 @@ class UserController extends AbstractController
             'email' => $userData->getEmail(),
             'firstname' => $userData->getFirstname(),
             'lastname' => $userData->getLastname()
-        ]);
+        ], 200);
     }
 
     # DISPLAY ALL USERS
@@ -93,7 +103,7 @@ class UserController extends AbstractController
             return $this->json([
                 'success' => false,
                 'message' => 'User not found'
-            ]);
+            ], 404);
         }
 
         // $login = $request->request->get('login');
