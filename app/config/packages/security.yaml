@@ -54,6 +54,9 @@ security:
     - { path: ^/api/carts/[0-9]+$, roles: IS_AUTHENTICATED_FULLY, methods: [PUT] }
     - { path: ^/api/carts/[0-9]+$, roles: IS_AUTHENTICATED_FULLY, methods: [DELETE] }
     - { path: ^/api/carts/validate, roles: IS_AUTHENTICATED_FULLY, methods: [PUT] }
+    - { path: ^/api/carts/orders, roles: IS_AUTHENTICATED_FULLY, methods: [GET] }
+    - { path: ^/api/carts/[0-9]+$, roles: IS_AUTHENTICATED_FULLY, methods: [GET] }
+
 
 when@test:
   security:
