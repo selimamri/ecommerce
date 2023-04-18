@@ -51,6 +51,7 @@ class UserController extends AbstractController
         $order->setCreationDate($date);
         
         $entityManager->persist($user);
+        $entityManager->persist($order);
         $entityManager->flush();
 
         return $this->json([
@@ -72,14 +73,7 @@ class UserController extends AbstractController
             ], 404);
         }
 
-        return $this->json([
-            'success' => true,
-            // 'login' => $userData->getLogin(),
-            // 'password' => $userData->getPassword(),
-            'email' => $userData->getEmail(),
-            'firstname' => $userData->getFirstname(),
-            'lastname' => $userData->getLastname()
-        ], 200);
+        return $this->json($userData, 200,[],['groups' => ['user']]);
     }
 
     # DISPLAY ALL USERS
@@ -88,7 +82,7 @@ class UserController extends AbstractController
     {
         $userData = $userRepository->findAll();
 
-        return $this->json($userData);
+        return $this->json($userData, 200,[],['groups' => ['user']]);
     }
 
     # UPDATE USER INFORMATION

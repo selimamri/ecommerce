@@ -30,19 +30,19 @@ class OrderController extends AbstractController
     {
         $productData = $productRepository->find($productId);
 
-        # check if the user is the owner of the order
-        $user = $this->getUser();
-        if ($order->getUser() !== $user) {
-            return $this->json([
-                'success' => false,
-                'message' => 'You are not the owner of this order'
-            ], 403);
-        }
+       
+        // $user = $this->getUser();
+        // if ($order->getUser() !== $user) {
+        //     return $this->json([
+        //         'success' => false,
+        //         'message' => 'You are not the owner of this order'
+        //     ], 403);
+        // }
 
         $data = json_decode($request->getContent(), true);
 
         $order->setTotalPrice($data['totalPrice']);
-        $order->setIsValidate($data['isValidate']);
+        $order->setIsValidate(false);
         $date = new \DateTime();
         $order->setCreationDate($date);
         
@@ -76,7 +76,7 @@ class OrderController extends AbstractController
             ];
         }
 
-        return $this->json($data, 200);
+        return $this->json($data, 200,[],['groups' => ['orders']]);
     }
 
 }

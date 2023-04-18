@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\OrderRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -15,21 +16,27 @@ class Order
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['order'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['order'])]
     private ?float $totalPrice = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['order'])]
     private ?\DateTimeInterface $creationDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
+    
     private ?User $user = null;
 
     #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'orders')]
+    #[Groups(['order'])]
     private Collection $products;
 
     #[ORM\Column]
+    #[Groups(['order'])]
     private ?bool $isValidate = null;
 
     public function __construct()
