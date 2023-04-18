@@ -138,4 +138,29 @@ class OrderController extends AbstractController
 
         return $this->json($data, 200,[],['groups' => ['order']]);
     }
+
+    # GET ORDER BY ID
+    #[Route('/api/orders/{orderId}', name: 'app_get_order_by_id', methods: ['GET'])]
+    public function getOrderById(OrderRepository $orderRepository, $orderId): JsonResponse
+    {
+        $user = $this->getUser();
+        $order = $orderRepository->findOneBy(['user' => $user, 'id' => $orderId, 'isValidate' => true]);
+
+        if (!$order) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Order not found'
+            ], 404);
+        }
+
+        $data = [
+            'id' => $order->getId(),
+            'totalPrice' => $order->getTotalPrice(),
+            'creationDate' => $order->getCreationDate(),
+            'isValidate' => $order->isValidate(),
+            'products' => $order->getProducts()
+        ];
+
+        return $this->json($data, 200,[],['groups' => ['order']]);
+    }
 }
