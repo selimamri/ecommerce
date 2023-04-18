@@ -26,6 +26,30 @@ class OrderController extends AbstractController
         ]);
     }
 
+    # VALIDATE AN ORDER
+    #[Route('/api/carts/validate', name: 'app_order_validate', methods: ['PUT'])]
+    public function validateOrder(OrderRepository $orderRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        $orderData = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
+        $orderData->setIsValidate(true);
+
+        $order = new Order();
+        $order->setTotalPrice(0);
+        $order->setUser($user);
+        $order->setIsValidate(false);
+        $date = new \DateTime();
+        $order->setCreationDate($date);
+
+        $entityManager->persist($order);
+        $entityManager->flush();
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Order Validated'
+        ], 200);
+    }
+
     # UPDATE AN ORDER
     #[Route('/api/carts/{productId}', name: 'app_order_update', methods: ['PUT'])]
     public function updateOrder(OrderRepository $orderRepository, ProductRepository $productRepository, EntityManagerInterface $entityManager, $productId): JsonResponse
@@ -74,30 +98,6 @@ class OrderController extends AbstractController
         return $this->json($data, 200,[],['groups' => ['order']]);
     }
 
-    # VALIDATE AN ORDER
-    #[Route('/api/carts/validate', name: 'app_order_validate', methods: ['PUT'])]
-    public function validateOrder(OrderRepository $orderRepository, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $user = $this->getUser();
-        $orderData = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
-
-        $orderData->setIsValidate(true);
-        $order = new Order();
-        $order->setTotalPrice(0);
-        $order->setUser($user);
-        $order->setIsValidate(false);
-        $date = new \DateTime();
-        $order->setCreationDate($date);
-
-        $entityManager->persist($order);
-        $entityManager->flush();
-
-        return $this->json([
-            'success' => true,
-            'message' => 'Order Validated'
-        ], 200);
-    }
-
     # DELETE A PRODUCT FROM AN ORDER
     #[Route('/api/carts/{productId}', name: 'app_order_delete', methods: ['DELETE'])]
     public function deleteProduct(OrderRepository $orderRepository, ProductRepository $productRepository, EntityManagerInterface $entityManager, $productId): JsonResponse
@@ -115,5 +115,27 @@ class OrderController extends AbstractController
             'success' => true,
             'message' => 'Product deleted from cart successfully'
         ], 200);
+    }
+
+    # GET ALL ORDERS OF A USER
+    #[Route('/api/orders', name: 'app_get_all_orders', methods: ['GET'])]
+    public function getAllOrders(OrderRepository $orderRepository): JsonResponse
+    {
+        $user = $this->getUser();
+        $orders = $orderRepository->findBy(['user' => $user, 'isValidate' => true]);
+
+        $data = [];
+
+        foreach ($orders as $order) {
+            $data[] = [
+                'id' => $order->getId(),
+                'totalPrice' => $order->getTotalPrice(),
+                'creationDate' => $order->getCreationDate(),
+                'isValidate' => $order->isValidate(),
+                'products' => $order->getProducts()
+            ];
+        }
+
+        return $this->json($data, 200,[],['groups' => ['order']]);
     }
 }

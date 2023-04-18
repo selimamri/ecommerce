@@ -35,7 +35,7 @@ class Product
     private ?float $price = null;
 
     #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'products')]
-    #[Groups(['order'])]
+    
     private Collection $orders;
 
     public function __construct()

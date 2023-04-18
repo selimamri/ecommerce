@@ -32,7 +32,6 @@ class Order
     private ?User $user = null;
 
     #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'orders')]
-    #[Groups(['order'])]
     private Collection $products;
 
     #[ORM\Column]
