@@ -26,57 +26,21 @@ class OrderController extends AbstractController
         ]);
     }
 
-//    # UPDATE AN ORDER
-//     #[Route('/api/carts/{productId}', name: 'app_order_update', methods: ['PUT'])]
-//     public function updateOrder(Order $order, OrderRepository $orderRepository, Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository, $productId): JsonResponse
-//     {
-//         $product = $productRepository->find($productId);
-//         $user = $this->getUser();
-//         # search the order of the user
-//         $order = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
-       
-//         if ($order->getUser() !== $user) {
-//             return $this->json([
-//                 'success' => false,
-//                 'message' => 'You are not the owner of this order'
-//             ], 403);
-//         }
-
-//         $data = json_decode($request->getContent(), true);
-
-//         // $order->setIsValidate(false);
-//         $date = new \DateTime();
-//         $order->setCreationDate($date);
-        
-//         $order->addProduct($product);
-//         $order->setTotalPrice($order->getTotalPrice() + $product->getPrice());
-
-//         // $entityManager->persist($order);
-//         $entityManager->flush();
-
-//         return $this->json([
-//             'success' => true,
-//             'message' => 'Order updated successfully'
-//         ], 200);
-//     }
-
+    # UPDATE AN ORDER
     #[Route('/api/carts/{productId}', name: 'app_order_update', methods: ['PUT'])]
-    public function updateOrder(OrderRepository $orderRepository, ProductRepository $productRepository, EntityManagerInterface $entityManager, Request $request, $productId): JsonResponse
+    public function updateOrder(OrderRepository $orderRepository, ProductRepository $productRepository, EntityManagerInterface $entityManager, $productId): JsonResponse
     {
         $product = $productRepository->find($productId);
         $user = $this->getUser();
         
-        // Récupérer la commande en cours de l'utilisateur
         $order = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
         
         if (!$order) {
-            // Si l'utilisateur n'a pas de commande en cours, créer une nouvelle commande
             $order = new Order();
             $order->setUser($user);
             $entityManager->persist($order);
         }
         
-        // Ajouter le produit à la commande
         $order->addProduct($product);
         $order->setTotalPrice($order->getTotalPrice() + $product->getPrice());
         
@@ -85,9 +49,8 @@ class OrderController extends AbstractController
         return $this->json([
             'success' => true,
             'message' => 'Product added to cart successfully'
-        ]);
+        ], 200);
     }
-
 
     # GET ALL ORDERS OF A USER
     #[Route('/api/carts', name: 'app_order_get', methods: ['GET'])]
@@ -111,4 +74,46 @@ class OrderController extends AbstractController
         return $this->json($data, 200,[],['groups' => ['order']]);
     }
 
+    # VALIDATE AN ORDER
+    #[Route('/api/carts/validate', name: 'app_order_validate', methods: ['PUT'])]
+    public function validateOrder(OrderRepository $orderRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        $orderData = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
+
+        $orderData->setIsValidate(true);
+        $order = new Order();
+        $order->setTotalPrice(0);
+        $order->setUser($user);
+        $order->setIsValidate(false);
+        $date = new \DateTime();
+        $order->setCreationDate($date);
+
+        $entityManager->persist($order);
+        $entityManager->flush();
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Order Validated'
+        ], 200);
+    }
+
+    # DELETE A PRODUCT FROM AN ORDER
+    #[Route('/api/carts/{productId}', name: 'app_order_delete', methods: ['DELETE'])]
+    public function deleteProduct(OrderRepository $orderRepository, ProductRepository $productRepository, EntityManagerInterface $entityManager, $productId): JsonResponse
+    {
+        $product = $productRepository->find($productId);
+        $user = $this->getUser();
+        $order = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
+
+        $order->removeProduct($product);
+        $order->setTotalPrice($order->getTotalPrice() - $product->getPrice());
+
+        $entityManager->flush();
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Product deleted from cart successfully'
+        ], 200);
+    }
 }
