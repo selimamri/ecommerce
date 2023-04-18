@@ -28,7 +28,7 @@ class Order
     private ?\DateTimeInterface $creationDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
-    
+    #[Groups(['order'])]
     private ?User $user = null;
 
     #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'orders')]
@@ -121,9 +121,5 @@ class Order
         $this->isValidate = $isValidate;
 
         return $this;
-    }
-
-  
-
-    
+    }    
 }
