@@ -107,7 +107,8 @@ class OrderController extends AbstractController
         $order = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
 
         $order->removeProduct($product);
-        $order->setTotalPrice($order->getTotalPrice() - $product->getPrice());
+
+        ($order->getTotalPrice() - $product->getPrice() < 0) ? $order->setTotalPrice(0) : $order->setTotalPrice($order->getTotalPrice() - $product->getPrice());
 
         $entityManager->flush();
 
