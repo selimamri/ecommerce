@@ -108,7 +108,7 @@ class OrderController extends AbstractController
             ];
         }
 
-        return $this->json($data, 200,[],['groups' => ['orders']]);
+        return $this->json($data, 200,[],['groups' => ['order']]);
     }
 
     #[Route('/api/carts/validate', name: 'app_order_update', methods: ['PUT'])]

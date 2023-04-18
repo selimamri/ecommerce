@@ -56,11 +56,9 @@ class ProductController extends AbstractController
             ], 404);
         }
 
-        return $this->json([
-            'success' => true,
-            'message' => 'Product found',
-            'data' => $productData
-        ], 200);
+        return $this->json(
+            $productData, 200, [], ['groups' => 'order']
+        );
     }
 
     # RETRIEVE INFORMATION ON A SPECIFIC PRODUCT
