@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Repository\OrderRepository;
 use App\Entity\Product;
+use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Repository\ProductRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,38 +26,68 @@ class OrderController extends AbstractController
         ]);
     }
 
-   # UPDATE AN ORDER
-    #[Route('/api/carts/{productId}', name: 'app_order_update', methods: ['PUT'])]
-    public function updateOrder(Order $order, Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository, $productId): JsonResponse
-    {
-        $productData = $productRepository->find($productId);
-
+//    # UPDATE AN ORDER
+//     #[Route('/api/carts/{productId}', name: 'app_order_update', methods: ['PUT'])]
+//     public function updateOrder(Order $order, OrderRepository $orderRepository, Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository, $productId): JsonResponse
+//     {
+//         $product = $productRepository->find($productId);
+//         $user = $this->getUser();
+//         # search the order of the user
+//         $order = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
        
-        // $user = $this->getUser();
-        // if ($order->getUser() !== $user) {
-        //     return $this->json([
-        //         'success' => false,
-        //         'message' => 'You are not the owner of this order'
-        //     ], 403);
-        // }
+//         if ($order->getUser() !== $user) {
+//             return $this->json([
+//                 'success' => false,
+//                 'message' => 'You are not the owner of this order'
+//             ], 403);
+//         }
 
-        $data = json_decode($request->getContent(), true);
+//         $data = json_decode($request->getContent(), true);
 
-        $order->setTotalPrice($data['totalPrice']);
-        $order->setIsValidate(false);
-        $date = new \DateTime();
-        $order->setCreationDate($date);
+//         // $order->setIsValidate(false);
+//         $date = new \DateTime();
+//         $order->setCreationDate($date);
         
-        $order->addProduct($productData);
+//         $order->addProduct($product);
+//         $order->setTotalPrice($order->getTotalPrice() + $product->getPrice());
 
-        $entityManager->persist($order);
+//         // $entityManager->persist($order);
+//         $entityManager->flush();
+
+//         return $this->json([
+//             'success' => true,
+//             'message' => 'Order updated successfully'
+//         ], 200);
+//     }
+
+    #[Route('/api/carts/{productId}', name: 'app_order_update', methods: ['PUT'])]
+    public function updateOrder(OrderRepository $orderRepository, ProductRepository $productRepository, EntityManagerInterface $entityManager, Request $request, $productId): JsonResponse
+    {
+        $product = $productRepository->find($productId);
+        $user = $this->getUser();
+        
+        // Récupérer la commande en cours de l'utilisateur
+        $order = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
+        
+        if (!$order) {
+            // Si l'utilisateur n'a pas de commande en cours, créer une nouvelle commande
+            $order = new Order();
+            $order->setUser($user);
+            $entityManager->persist($order);
+        }
+        
+        // Ajouter le produit à la commande
+        $order->addProduct($product);
+        $order->setTotalPrice($order->getTotalPrice() + $product->getPrice());
+        
         $entityManager->flush();
-
+        
         return $this->json([
             'success' => true,
-            'message' => 'Order updated successfully'
-        ], 200);
+            'message' => 'Product added to cart successfully'
+        ]);
     }
+
 
     # GET ALL ORDERS OF A USER
     #[Route('/api/carts', name: 'app_order_get', methods: ['GET'])]
