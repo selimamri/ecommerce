@@ -108,7 +108,7 @@ class OrderController extends AbstractController
             ];
         }
 
-        return $this->json($data, 200,[],['groups' => ['orders']]);
+        return $this->json($data, 200,[],['groups' => ['order']]);
     }
 
 }
