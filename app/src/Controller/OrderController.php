@@ -69,12 +69,12 @@ class OrderController extends AbstractController
         // Récupérer la commande en cours de l'utilisateur
         $order = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
         
-        if (!$order) {
-            // Si l'utilisateur n'a pas de commande en cours, créer une nouvelle commande
-            $order = new Order();
-            $order->setUser($user);
-            $entityManager->persist($order);
-        }
+        // if (!$order) {
+        //     // Si l'utilisateur n'a pas de commande en cours, créer une nouvelle commande
+        //     $order = new Order();
+        //     $order->setUser($user);
+        //     $entityManager->persist($order);
+        // }
         
         // Ajouter le produit à la commande
         $order->addProduct($product);
@@ -111,4 +111,24 @@ class OrderController extends AbstractController
         return $this->json($data, 200,[],['groups' => ['orders']]);
     }
 
+    #[Route('/api/carts/validate', name: 'app_order_update', methods: ['PUT'])]
+    public function validateOrder(OrderRepository $orderRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        
+        $user = $this->getUser();
+        $orderData = $orderRepository->findOneBy(['user' => $user, 'isValidate' => false]);
+        $orderData->setIsValidate(true);
+        $order = new Order();
+        $order->setTotalPrice(0);
+        $order->setUser($user);
+        $order->setIsValidate(false);
+        $date = new \DateTime();
+        $order->setCreationDate($date);
+        $entityManager->persist($order);
+        $entityManager->flush();     
+        return $this->json([
+            'success' => true,
+            'message' => 'Order Validated'
+        ]);
+    }
 }
