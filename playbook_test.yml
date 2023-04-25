@@ -48,6 +48,7 @@
           - php8.2-common
           - php8.2-curl
           - php8.2-mysql
+          - php8.2-xml
         state: present
     - name: Installer Composer
       shell: wget -O composer-setup.php https://getcomposer.org/installer
@@ -73,12 +74,22 @@
 
     # - name: grant privileges
     #   shell: mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'symfony'@'localhost';"
+    - name: connect to database
+      mysql_db:
+        login_host: 127.0.0.1
+        login_port: 3306
+        login_user: symfony
+        login_password: symfony
+        name: ecommerce
 
+    # - name: create database
+    #   shell: mysql -u symfony -psymfony -e "CREATE DATABASE ecommerce;"
     - name: clone git repo
       ansible.builtin.git:
         repo: https://github.com/selimamri/ecommerce.git
         dest: /var/www/html/ecommerce
         clone: yes
+        force: yes
     - name: install symfony
       shell: curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash
     - name: update apt
@@ -86,19 +97,14 @@
     - name: install symfony
       shell: apt install symfony-cli
     - name: composer install dependencies
-      shell: composer install -y
-      args:
-        chdir: /var/www/html/ecommerce/app
+      shell: cd /var/www/html/ecommerce/app && yes | composer install
     - name: composer update dependencies
-      shell: composer update -y
-      args:
-        chdir: /var/www/html/ecommerce/app
-    - name: create jwt
-      shell: php bin/console lexik:jwt:generate-keypair
-      args:
-        chdir: /var/www/html/ecommerce/app
-
-    - name: launch project
-      shell: symfony server:start
-      args:
-        chdir: /var/www/html/ecommerce/app
+      shell: cd /var/www/html/ecommerce/app && yes | composer update
+    # - name: create jwt
+    #   shell: cd /var/www/html/ecommerce/app && php bin/console lexik:jwt:generate-keypair
+    - name: create database doctrine
+      shell: cd /var/www/html/ecommerce/app && php bin/console make:migration
+    - name: create schema
+      shell: cd /var/www/html/ecommerce/app && yes | php bin/console doctrine:migrations:migrate
+    # - name: launch project
+    #   shell: cd /var/www/html/ecommerce/app | symfony server:start
