@@ -23,7 +23,7 @@ class UserController extends AbstractController
         return $this->json([
             'message' => 'Welcome to your new controller!',
             'path' => 'src/Controller/ApiController.php',
-        ]);
+        ], 200);
     }
 
     # CREATE A USER
@@ -58,6 +58,37 @@ class UserController extends AbstractController
             'success' => true,
             'message' => 'User and Order created successfully'
         ], 201);
+
+        if (empty($data['login'])) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Missing login field'
+            ], 400);
+        }
+        if (empty($data['email'])) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Missing email field'
+            ], 400);
+        }
+        if (empty($data['password'])) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Missing password field'
+            ], 400);
+        }
+        if (empty($data['firstname'])) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Missing firstname field'
+            ], 400);
+        }
+        if (empty($data['lastname'])) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Missing lastname field'
+            ], 400);
+        }
     }
 
     # DISPLAY USER INFORMATION
@@ -81,6 +112,13 @@ class UserController extends AbstractController
     public function list(UserRepository $userRepository): JsonResponse
     {
         $userData = $userRepository->findAll();
+
+        if (!$userData) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Users not found'
+            ], 404);
+        }
 
         return $this->json($userData, 200,[],['groups' => ['user']]);
     }
@@ -113,7 +151,6 @@ class UserController extends AbstractController
 
         $entityManager->persist($userData);
         $entityManager->flush();
-
 
         return $this->json([
             'success' => true,

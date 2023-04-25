@@ -44,6 +44,13 @@ class OrderController extends AbstractController
         $entityManager->persist($order);
         $entityManager->flush();
 
+        if ($orderData->isValidate()) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Order already validated'
+            ], 400);
+        }
+
         return $this->json([
             'success' => true,
             'message' => 'Order Validated'
@@ -69,7 +76,21 @@ class OrderController extends AbstractController
         $order->setTotalPrice($order->getTotalPrice() + $product->getPrice());
         
         $entityManager->flush();
-        
+
+        if ($order->getProducts()->contains($product)) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Product already exists in cart'
+            ], 400);
+        }
+
+        if (!$product) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Product not found'
+            ], 404);
+        }
+
         return $this->json([
             'success' => true,
             'message' => 'Product added to cart successfully'
@@ -112,6 +133,20 @@ class OrderController extends AbstractController
 
         $entityManager->flush();
 
+        if (!$order->getProducts()->contains($product)) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Product not found in cart'
+            ], 404);
+        }
+
+        if (!$product) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Product not found'
+            ], 404);
+        }
+
         return $this->json([
             'success' => true,
             'message' => 'Product deleted from cart successfully'
@@ -135,6 +170,13 @@ class OrderController extends AbstractController
                 'isValidate' => $order->isValidate(),
                 'products' => $order->getProducts()
             ];
+        }
+
+        if (!$orders) {
+            return $this->json([
+                'success' => false,
+                'message' => 'No orders found'
+            ], 404);
         }
 
         return $this->json($data, 200,[],['groups' => ['order']]);
@@ -161,6 +203,13 @@ class OrderController extends AbstractController
             'isValidate' => $order->isValidate(),
             'products' => $order->getProducts()
         ];
+
+        if (empty($order->getProducts())) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Order is empty'
+            ], 404);
+        }
 
         return $this->json($data, 200,[],['groups' => ['order']]);
     }

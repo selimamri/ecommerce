@@ -24,7 +24,7 @@ class ProductController extends AbstractController
 
     # ADD A PRODUCT
     #[Route('api/products', name: 'app_product_create', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function new(Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository): JsonResponse
     {
         $data=json_decode($request->getContent(),true);
         $product = new Product();
@@ -41,6 +41,13 @@ class ProductController extends AbstractController
             'success' => true,
             'message' => 'Product created successfully'
         ], 201);
+
+        if ($productRepository->findOneBy(['name' => $data['name']])) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Product already exists'
+            ], 400);
+        }
     }
 
     # RETRIEVE LIST OF PRODUCTS
@@ -79,6 +86,7 @@ class ProductController extends AbstractController
                 'data' => $productData
             ], 200);
         }
+
     }
 
     # MODIFY AND DELETE A PRODUCT
