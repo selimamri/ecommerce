@@ -1,0 +1,104 @@
+- name: Configuration symfony deploying
+  hosts: all
+  become: yes
+  tasks:
+    - name: Gather Facts
+      ansible.builtin.setup:
+    - name: Check if running on Debian 11
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+          - ansible_distribution_major_version == "11"
+        fail_msg: "Not running on Debian 11"
+        success_msg: "Running on Debian 11"
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: yes
+    - name: Install dependencies system
+      ansible.builtin.apt:
+        name:
+          - curl
+          - wget
+          - unzip
+          - zip
+          - gnupg2
+          - apt-transport-https
+          - ca-certificates
+          - lsb-release
+          - software-properties-common
+          - dirmngr
+          - apt-utils
+          - git
+          - apache2
+        state: present
+    - name: get sury packages
+      shell: wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+    - name: add surry to repo
+      shell: echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
+    - name: update_cache
+      shell: apt update
+    - name: upgrade apt
+      shell: apt upgrade -y
+    - name: Install php 8.2
+      ansible.builtin.apt:
+        name:
+          - php8.2
+          - php8.2-cli
+          - php8.2-common
+          - php8.2-curl
+          - php8.2-mysql
+        state: present
+    - name: Installer Composer
+      shell: wget -O composer-setup.php https://getcomposer.org/installer
+    - name: Install Composer
+      shell: php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    - name: install MariaDB
+      ansible.builtin.apt:
+        name:
+          - mariadb-server
+          - mariadb-client
+        state: present
+    - name: install python3
+      ansible.builtin.apt:
+        name:
+          - python3
+          - python3-pip
+        state: present
+    - name: pip install pymysql
+      shell: pip install pymysql
+
+    # - name: Create database user
+    #   shell: mysql -e "CREATE USER 'symfony'@'localhost' IDENTIFIED BY 'symfony';"
+
+    # - name: grant privileges
+    #   shell: mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'symfony'@'localhost';"
+
+    - name: clone git repo
+      ansible.builtin.git:
+        repo: https://github.com/selimamri/ecommerce.git
+        dest: /var/www/html/ecommerce
+        clone: yes
+    - name: install symfony
+      shell: curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash
+    - name: update apt
+      shell: apt update
+    - name: install symfony
+      shell: apt install symfony-cli
+    - name: composer install dependencies
+      shell: composer install -y
+      args:
+        chdir: /var/www/html/ecommerce/app
+    - name: composer update dependencies
+      shell: composer update -y
+      args:
+        chdir: /var/www/html/ecommerce/app
+    - name: create jwt
+      shell: php bin/console lexik:jwt:generate-keypair
+      args:
+        chdir: /var/www/html/ecommerce/app
+
+    - name: launch project
+      shell: symfony server:start
+      args:
+        chdir: /var/www/html/ecommerce/app
