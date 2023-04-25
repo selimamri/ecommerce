@@ -45,7 +45,7 @@ class ProductController extends AbstractController
         if ($productRepository->findOneBy(['name' => $data['name']])) {
             return $this->json([
                 'success' => false,
-                'message' => 'Product already exists'
+                'error' => 'Product already exists'
             ], 400);
         }
     }
@@ -59,7 +59,7 @@ class ProductController extends AbstractController
         if (!$productData) {
             return $this->json([
                 'success' => false,
-                'message' => 'No product found'
+                'error' => 'No product found'
             ], 404);
         }
 
@@ -77,7 +77,7 @@ class ProductController extends AbstractController
         if (!$productData) {
             return $this->json([
                 'success' => false,
-                'message' => 'Product not found'
+                'error' => 'Product not found'
             ], 404);
         } else {
             return $this->json([
@@ -98,7 +98,7 @@ class ProductController extends AbstractController
         if (!$productData) {
             return $this->json([
                 'success' => false,
-                'message' => 'Product not found'
+                'error' => 'Product not found'
             ], 404);
         }
 
@@ -112,6 +112,13 @@ class ProductController extends AbstractController
 
             $entityManager->persist($productData);
             $entityManager->flush();
+
+            if (!$productData) {
+                return $this->json([
+                    'success' => false,
+                    'error' => 'Product not found'
+                ], 404);
+            }
 
             return $this->json([
                 'success' => true,
