@@ -56,7 +56,7 @@ class UserController extends AbstractController
 
         return $this->json([
             'success' => true,
-            'message' => 'User and Order created successfully'
+            'error' => 'User and Order created successfully'
         ], 201);
 
         if (empty($data['login'])) {
@@ -100,7 +100,7 @@ class UserController extends AbstractController
         if (!$userData) {
             return $this->json([
                 'success' => false,
-                'message' => 'User not found'
+                'error' => 'User not found'
             ], 404);
         }
 
@@ -116,7 +116,7 @@ class UserController extends AbstractController
         if (!$userData) {
             return $this->json([
                 'success' => false,
-                'message' => 'Users not found'
+                'error' => 'Users not found'
             ], 404);
         }
 
@@ -134,7 +134,7 @@ class UserController extends AbstractController
         if (!$userData) {
             return $this->json([
                 'success' => false,
-                'message' => 'User not found'
+                'error' => 'User not found'
             ], 404);
         }
 

@@ -47,7 +47,7 @@ class OrderController extends AbstractController
         if ($orderData->isValidate()) {
             return $this->json([
                 'success' => false,
-                'message' => 'Order already validated'
+                'error' => 'Order already validated'
             ], 400);
         }
 
@@ -80,14 +80,14 @@ class OrderController extends AbstractController
         if ($order->getProducts()->contains($product)) {
             return $this->json([
                 'success' => false,
-                'message' => 'Product already exists in cart'
+                'error' => 'Product already exists in cart'
             ], 400);
         }
 
         if (!$product) {
             return $this->json([
                 'success' => false,
-                'message' => 'Product not found'
+                'error' => 'Product not found'
             ], 404);
         }
 
@@ -136,14 +136,14 @@ class OrderController extends AbstractController
         if (!$order->getProducts()->contains($product)) {
             return $this->json([
                 'success' => false,
-                'message' => 'Product not found in cart'
+                'error' => 'Product not found in cart'
             ], 404);
         }
 
         if (!$product) {
             return $this->json([
                 'success' => false,
-                'message' => 'Product not found'
+                'error' => 'Product not found'
             ], 404);
         }
 
@@ -175,7 +175,7 @@ class OrderController extends AbstractController
         if (!$orders) {
             return $this->json([
                 'success' => false,
-                'message' => 'No orders found'
+                'error' => 'No orders found'
             ], 404);
         }
 
@@ -192,7 +192,7 @@ class OrderController extends AbstractController
         if (!$order) {
             return $this->json([
                 'success' => false,
-                'message' => 'Order not found'
+                'error' => 'Order not found'
             ], 404);
         }
 
@@ -207,7 +207,7 @@ class OrderController extends AbstractController
         if (empty($order->getProducts())) {
             return $this->json([
                 'success' => false,
-                'message' => 'Order is empty'
+                'error' => 'Order is empty'
             ], 404);
         }
 
